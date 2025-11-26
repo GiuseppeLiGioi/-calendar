@@ -1,5 +1,9 @@
-import { Slot } from "expo-router";
+import { Tabs } from "expo-router";
 
-export default function TabLayout() {
-  return <Slot />;
+export default function RootLayout() {
+  return (
+    <Tabs>
+      <Tabs.Screen name="index" options={{ title: "Home" }} />
+    </Tabs>
+  );
 }
