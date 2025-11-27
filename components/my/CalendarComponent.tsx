@@ -12,10 +12,6 @@ type CalendarProps = {
   borderColor: string;
   colorRange: string;
   colorNumberSelected: string;
-  onSelected: (dates: {
-    startDate: string | undefined;
-    endDate: string | undefined;
-  }) => void;
 };
 type MarkedDateProps = {
   selected?: boolean;
@@ -35,7 +31,6 @@ type MarkedDates = {
 export default function CalendarComponent({
   colorBackground,
   colorNumbers,
-  onSelected,
   colorText,
   todayColor,
   colorNumberSelected,
@@ -53,7 +48,7 @@ export default function CalendarComponent({
   const selectedDates = (start: string, end?: string): MarkedDates => {
     //creo un oggeto marks che conterrà ciascun giorno con le sue proprietà
     const marks: MarkedDates = {};
-    //se start non esiste faccio ritorno oggetto vuoto.
+    //se start non esiste ritorno oggetto vuoto.
     if (!start) {
       return marks;
     }
@@ -75,6 +70,7 @@ export default function CalendarComponent({
     while (currentDate <= endDate) {
       //per ogni elemento converto in stringa ISO, setto le proprietà dell' elemento e poi incremento di 1, in modo da far passare il ciclo al giorno usccessivo.
       const keyDate = currentDate.toISOString().split("T")[0];
+      //per tutti i giorni (keyDate) fino a <= di endDate verrà eseguito questo codice, markando così ogni giorno (range).
       marks[keyDate] = {
         selected: true,
         color: colorRange,
@@ -141,12 +137,15 @@ export default function CalendarComponent({
             } else if (!selectedEnd) {
               if (day.dateString === selectedStart) return; // evita che si possa inserire lo stesso giorno sia come start che come end.
               if (day.dateString <= selectedStart) {
+                //se la seconda data scelta è inferiore della prima, invertiamo i valori, la prima sarà la finale.
                 newStart = day.dateString;
                 newEnd = selectedStart;
               } else {
+                //se invece è maggiore semplicemente la setto come finale.
                 newEnd = day.dateString;
               }
             } else {
+              // else reset
               newStart = day.dateString;
               newEnd = undefined;
             }
@@ -157,10 +156,6 @@ export default function CalendarComponent({
             const newMarks = { newStart, newEnd };
             //sincronizzo lo stato del range e passo i valori alla funzione chiamante da home.
             setMarkedDates(newMarks);
-            onSelected({
-              startDate: newStart,
-              endDate: newEnd,
-            });
           }}
           markingType="period"
           markedDates={

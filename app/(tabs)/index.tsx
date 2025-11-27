@@ -1,12 +1,6 @@
 import CalendarComponent from "@/components/my/CalendarComponent";
-import { useState } from "react";
 import { View } from "react-native";
 export default function HomeScreen() {
-  const [selectedRange, setSelectedRange] = useState<{
-    startDate?: string;
-    endDate?: string;
-  }>({});
-
   // Sfondo del calendario
   const colorBackground: string = "#ffffffff";
 
@@ -42,9 +36,6 @@ export default function HomeScreen() {
           disabledColor={disabledColor}
           colorRange={colorRange}
           colorNumberSelected={colorNumberSelected}
-          onSelected={(dates) => {
-            console.log(dates), setSelectedRange(dates);
-          }}
         />
       </View>
     </>
