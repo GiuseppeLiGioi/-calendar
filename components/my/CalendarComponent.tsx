@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Platform, StyleSheet, Text, View } from "react-native";
 import { Calendar } from "react-native-calendars";
 
 type CalendarProps = {
@@ -95,21 +95,36 @@ export default function CalendarComponent({
     <View
       style={styles.container}
       onLayout={(event) => {
-        const { width, height } = event.nativeEvent.layout;
-        const newSize = Math.min(width, height);
-        setContainerSize(newSize);
+        const { width } = event.nativeEvent.layout;
+        setContainerSize(width);
       }}
     >
-      <View style={styles.innerContainer}>
+      <View
+        style={[
+          styles.innerContainer,
+          {
+            width: calendarSize,
+            marginBottom:
+              containerSize < 500
+                ? containerSize * 0.3
+                : containerSize > 750
+                ? containerSize * 0.02
+                : containerSize * 0.1,
+          },
+          Platform.OS === "web"
+            ? { height: containerSize * 0.6 }
+            : { aspectRatio: 1 },
+        ]}
+      >
         <Calendar
           style={{
-            flex: 1,
+            width: calendarSize,
+
             padding: calendarSize * 0.04,
             marginVertical: calendarSize * 0.05,
             borderRadius: calendarSize * 0.1,
             borderWidth: calendarSize * 0.005,
             borderColor: borderColor,
-
             overflow: "hidden",
           }}
           theme={{
@@ -166,15 +181,21 @@ export default function CalendarComponent({
       </View>
 
       {(selectedStart || selectedEnd) && (
-        <View>
+        <View style={[styles.bottomContainer, { width: calendarSize }]}>
           <Text
             style={{
               textAlign: "center",
               fontSize: containerSize * 0.05,
-              marginTop: containerSize * 0.01,
             }}
           >
             {formatDate(selectedStart)}
+          </Text>
+          <Text
+            style={{
+              textAlign: "center",
+              fontSize: containerSize * 0.05,
+            }}
+          >
             {"   "}-{"   "}
             {formatDate(selectedEnd)}
           </Text>
@@ -186,25 +207,22 @@ export default function CalendarComponent({
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: "space-around",
+    width: "100%",
+    maxWidth: 800, // per non avere calendario troppo stretchato
+    justifyContent: "space-between",
     alignItems: "center",
-    borderWidth: 2,
-    borderColor: "red",
   },
 
   innerContainer: {
-    width: "100%",
     justifyContent: "center",
     alignItems: "center",
     aspectRatio: 1,
-    borderWidth: 2,
-    borderColor: "green",
   },
 
-  customContainer: {
-    width: "80%",
-    borderWidth: 2,
-    borderColor: "#f08383ff",
+  bottomContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 5,
   },
 });
