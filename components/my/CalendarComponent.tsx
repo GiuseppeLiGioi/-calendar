@@ -8,18 +8,24 @@ type CalendarProps = {
   colorBackground: string;
   colorBackNumber: string;
   colorDot: string;
-  colorNumber: string;
+  colorNumbers: string;
   todayColor: string;
   colorText: string;
+  disabledColor: string;
+  colorRange: string;
+  colorNumberSelected: string;
   onSelected: (dates: [string | undefined, string | undefined]) => boolean;
   onChangeMonth: (m: number) => void;
 };
 type MarkedDateProps = {
   selected?: boolean;
   selectedColor?: string;
+  color?: string;
   selectedDotColor?: string;
   disabled?: boolean;
   marked?: boolean;
+  startingDay?: boolean;
+  endingDay?: boolean;
 };
 
 type MarkedDates = {
@@ -32,11 +38,14 @@ export default function CalendarComponent({
   colorBackground,
   colorBackNumber,
   colorDot,
-  colorNumber,
+  colorNumbers,
   onSelected,
   colorText,
   todayColor,
+  colorNumberSelected,
   onChangeMonth,
+  colorRange,
+  disabledColor,
 }: CalendarProps) {
   const [selectedStart, setSelectedStart] = useState<string | undefined>("");
   const [selectedEnd, setSelectedEnd] = useState<string | undefined>("");
@@ -50,6 +59,8 @@ export default function CalendarComponent({
     }
     if (!end) {
       marks[start] = {
+        startingDay: true,
+        endingDay: true,
         selected: true,
         selectedColor: colorBackNumber,
         selectedDotColor: colorDot,
@@ -64,8 +75,10 @@ export default function CalendarComponent({
       const keyDate = currentDate.toISOString().split("T")[0];
       marks[keyDate] = {
         selected: true,
-        selectedColor: colorBackNumber,
+        color: colorRange,
         selectedDotColor: colorDot,
+        startingDay: keyDate === start,
+        endingDay: keyDate === end,
       };
       currentDate.setDate(currentDate.getDate() + 1); //setto il valore del giorno a quello immediatamente successivo grazie a set e get Date. Es. 15 => 16.
     }
@@ -95,11 +108,11 @@ export default function CalendarComponent({
         theme={{
           calendarBackground: colorBackground,
           textSectionTitleColor: colorText,
-          selectedDayBackgroundColor: "#08f500ff",
-          selectedDayTextColor: "#f70505ff",
+          selectedDayTextColor: colorNumberSelected,
           todayTextColor: todayColor,
-          dayTextColor: "#2d4150",
-          textDisabledColor: "#dd99ee",
+          dayTextColor: colorNumbers,
+
+          textDisabledColor: disabledColor,
         }}
         onDayPress={(day) => {
           //se non esiste la data di inizio la setto e metto quella finale undefined.
@@ -122,6 +135,7 @@ export default function CalendarComponent({
             setSelectedEnd(undefined);
           }
         }}
+        markingType="period"
         markedDates={
           //faccio controllo, se esiste una data di inizio si esegue la funzione, altrimenti no.
           selectedStart ? selectedDates(selectedStart, selectedEnd) : {}

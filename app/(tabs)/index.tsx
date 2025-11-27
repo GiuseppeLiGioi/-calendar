@@ -14,9 +14,12 @@ export default function HomeScreen() {
   const colorBackground: string = "#fbb5b5ff"; //colore di sfondo calendario
   const colorBackNumber: string = "#7ac3ffff"; //colore di sfondo numero del giorno
   const colorDot: string = "#6bfaeeff"; //colore di pallino giorno selezionato
-  const colorNumber: string = "#d6fd82ff"; //colore di sfondo calendario
-  const colorText: string = "#10a529ff";
-  const todayColor: string = "#f505e9ff";
+  const colorNumbers: string = "#d6fd82ff"; //colore dei numeri
+  const colorNumberSelected: string = "#fd0505ff"; //colore del numero selezionato
+  const colorText: string = "#10a529ff"; //colore dei testi
+  const todayColor: string = "#f505e9ff"; //colore data di oggi
+  const colorRange: string = "#3fb9f1ff";
+  const disabledColor: string = "rgba(126, 126, 126, 0.4)"; //colore numeri non selezionabili
   const onSelected = (
     dates: [string | undefined, string | undefined]
   ): boolean => {
@@ -36,7 +39,10 @@ export default function HomeScreen() {
         colorDot={colorDot}
         colorText={colorText}
         todayColor={todayColor}
-        colorNumber={colorNumber}
+        colorNumbers={colorNumbers}
+        disabledColor={disabledColor}
+        colorRange={colorRange}
+        colorNumberSelected={colorNumberSelected}
         onSelected={onSelected}
         onChangeMonth={onChangeMonth}
       />
