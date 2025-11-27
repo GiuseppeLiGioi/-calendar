@@ -139,6 +139,7 @@ export default function CalendarComponent({
               newStart = day.dateString;
               newEnd = undefined;
             } else if (!selectedEnd) {
+              if (day.dateString === selectedStart) return; // evita che si possa inserire lo stesso giorno sia come start che come end.
               if (day.dateString <= selectedStart) {
                 newStart = day.dateString;
                 newEnd = selectedStart;
