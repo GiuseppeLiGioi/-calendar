@@ -2,9 +2,6 @@ import { useState } from "react";
 import { View } from "react-native";
 import { Calendar } from "react-native-calendars";
 type CalendarProps = {
-  startDate: Date | undefined;
-  endDate: Date | undefined;
-
   colorBackground: string;
   colorBackNumber: string;
   colorDot: string;
@@ -24,6 +21,7 @@ type MarkedDateProps = {
   selectedDotColor?: string;
   disabled?: boolean;
   marked?: boolean;
+  dotColor: string;
   startingDay?: boolean;
   endingDay?: boolean;
 };
@@ -33,8 +31,6 @@ type MarkedDates = {
 };
 
 export default function CalendarComponent({
-  startDate,
-  endDate,
   colorBackground,
   colorBackNumber,
   colorDot,
@@ -60,10 +56,11 @@ export default function CalendarComponent({
     if (!end) {
       marks[start] = {
         startingDay: true,
+        marked: true,
         endingDay: true,
         selected: true,
         selectedColor: colorBackNumber,
-        selectedDotColor: colorDot,
+        dotColor: colorDot,
       };
       return marks;
     }
@@ -76,7 +73,7 @@ export default function CalendarComponent({
       marks[keyDate] = {
         selected: true,
         color: colorRange,
-        selectedDotColor: colorDot,
+        dotColor: colorDot,
         startingDay: keyDate === start,
         endingDay: keyDate === end,
       };
@@ -119,20 +116,27 @@ export default function CalendarComponent({
           if (!selectedStart) {
             setSelectedStart(day.dateString);
             setSelectedEnd(undefined);
+
+            onSelected([day.dateString, undefined]);
           }
           //se non esiste la data di fine: se la data selezionata è minore di quella di inizio, salviamo la nuova data più piccola, aggiornando invece la data di fine come la precedente iniziale diventata superiore.
           else if (!selectedEnd) {
             if (day.dateString <= selectedStart) {
               setSelectedStart(day.dateString);
               setSelectedEnd(selectedStart);
+
+              onSelected([day.dateString, selectedStart]);
             } else {
               setSelectedEnd(day.dateString);
+              onSelected([selectedStart, day.dateString]);
             }
             //se è più grande di quella di inzio semplicemente setto quella di fine.
           } else {
             //se entrambe esistono resetto.
             setSelectedStart(day.dateString);
             setSelectedEnd(undefined);
+
+            onSelected([day.dateString, undefined]);
           }
         }}
         markingType="period"
