@@ -1,18 +1,21 @@
 import { useState } from "react";
-import { View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { Calendar } from "react-native-calendars";
+
 type CalendarProps = {
   colorBackground: string;
-  colorBackNumber: string;
-  colorDot: string;
+
   colorNumbers: string;
   todayColor: string;
   colorText: string;
   disabledColor: string;
+  borderColor: string;
   colorRange: string;
   colorNumberSelected: string;
-  onSelected: (dates: [string | undefined, string | undefined]) => boolean;
-  onChangeMonth: (m: number) => void;
+  onSelected: (dates: {
+    startDate: string | undefined;
+    endDate: string | undefined;
+  }) => void;
 };
 type MarkedDateProps = {
   selected?: boolean;
@@ -21,7 +24,6 @@ type MarkedDateProps = {
   selectedDotColor?: string;
   disabled?: boolean;
   marked?: boolean;
-  dotColor: string;
   startingDay?: boolean;
   endingDay?: boolean;
 };
@@ -32,48 +34,50 @@ type MarkedDates = {
 
 export default function CalendarComponent({
   colorBackground,
-  colorBackNumber,
-  colorDot,
   colorNumbers,
   onSelected,
   colorText,
   todayColor,
   colorNumberSelected,
-  onChangeMonth,
+  borderColor,
   colorRange,
   disabledColor,
 }: CalendarProps) {
   const [selectedStart, setSelectedStart] = useState<string | undefined>("");
   const [selectedEnd, setSelectedEnd] = useState<string | undefined>("");
-  const [currentMonth, setCurrentMonth] = useState<number>(0);
+  const [containerSize, setContainerSize] = useState<number>(0);
   const [markedDates, setMarkedDates] = useState<{}>({});
 
+  const calendarSize = Math.max(containerSize * 0.9, 320);
+
   const selectedDates = (start: string, end?: string): MarkedDates => {
+    //creo un oggeto marks che conterrà ciascun giorno con le sue proprietà
     const marks: MarkedDates = {};
+    //se start non esiste faccio ritorno oggetto vuoto.
     if (!start) {
       return marks;
     }
+    // se non c'è la data di fine, ritorno il singolo oggetto e gli attribuisco le proprietà
     if (!end) {
       marks[start] = {
         startingDay: true,
-        marked: true,
         endingDay: true,
+        marked: false,
         selected: true,
-        selectedColor: colorBackNumber,
-        dotColor: colorDot,
+        color: colorRange,
       };
       return marks;
     }
-
+    // se sono presenti entrambi, mi salvo i valori e ciclo fin tanto che la data di fine è <= a quella di inizio, in modo da selezionare tutti gli elementi.
     const currentDate = new Date(start);
     const endDate = new Date(end);
 
     while (currentDate <= endDate) {
+      //per ogni elemento converto in stringa ISO, setto le proprietà dell' elemento e poi incremento di 1, in modo da far passare il ciclo al giorno usccessivo.
       const keyDate = currentDate.toISOString().split("T")[0];
       marks[keyDate] = {
         selected: true,
         color: colorRange,
-        dotColor: colorDot,
         startingDay: keyDate === start,
         endingDay: keyDate === end,
       };
@@ -82,69 +86,117 @@ export default function CalendarComponent({
 
     return marks;
   };
+
+  //funzione per trasformare da YYYY-MM-DD a DD-MM-YYYY
+  const formatDate = (date?: string): string => {
+    if (!date) return "";
+    const [year, month, day] = date.split("-");
+    return `${day}-${month}-${year}`;
+  };
   return (
     <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
+      style={styles.container}
+      onLayout={(event) => {
+        const { width, height } = event.nativeEvent.layout;
+        const newSize = Math.min(width, height, 450);
+        if (newSize !== containerSize) setContainerSize(newSize);
+        console.log(newSize);
       }}
     >
-      <Calendar
-        style={{
-          width: "80%",
-          aspectRatio: 1,
-          marginVertical: 10,
-          borderRadius: 20,
-          borderWidth: 1,
+      <View style={styles.innerContainer}>
+        <Calendar
+          style={{
+            minWidth: calendarSize,
+            aspectRatio: 1,
+            padding: calendarSize * 0.04,
+            marginVertical: calendarSize * 0.05,
+            borderRadius: calendarSize * 0.1,
+            borderWidth: calendarSize * 0.005,
+            borderColor: borderColor,
 
-          borderColor: "gray",
+            overflow: "hidden",
+          }}
+          theme={{
+            calendarBackground: colorBackground,
+            textSectionTitleColor: colorText,
+            selectedDayTextColor: colorNumberSelected,
+            todayTextColor: todayColor,
+            dayTextColor: colorNumbers,
+            textDisabledColor: disabledColor,
 
-          overflow: "hidden",
-        }}
-        theme={{
-          calendarBackground: colorBackground,
-          textSectionTitleColor: colorText,
-          selectedDayTextColor: colorNumberSelected,
-          todayTextColor: todayColor,
-          dayTextColor: colorNumbers,
+            textDayFontSize: calendarSize * 0.065,
+            textDayHeaderFontSize: calendarSize * 0.045,
+            textMonthFontSize: calendarSize * 0.065,
 
-          textDisabledColor: disabledColor,
-        }}
-        onDayPress={(day) => {
-          //se non esiste la data di inizio la setto e metto quella finale undefined.
-          if (!selectedStart) {
-            setSelectedStart(day.dateString);
-            setSelectedEnd(undefined);
+            weekVerticalMargin: calendarSize * 0.01,
+          }}
+          onDayPress={(day) => {
+            let newStart = selectedStart;
+            let newEnd = selectedEnd;
 
-            onSelected([day.dateString, undefined]);
-          }
-          //se non esiste la data di fine: se la data selezionata è minore di quella di inizio, salviamo la nuova data più piccola, aggiornando invece la data di fine come la precedente iniziale diventata superiore.
-          else if (!selectedEnd) {
-            if (day.dateString <= selectedStart) {
-              setSelectedStart(day.dateString);
-              setSelectedEnd(selectedStart);
-
-              onSelected([day.dateString, selectedStart]);
+            //se non esiste la data di inizio la setto e metto quella finale undefined.
+            if (!selectedStart) {
+              newStart = day.dateString;
+              newEnd = undefined;
+            } else if (!selectedEnd) {
+              if (day.dateString <= selectedStart) {
+                newStart = day.dateString;
+                newEnd = selectedStart;
+              } else {
+                newEnd = day.dateString;
+              }
             } else {
-              setSelectedEnd(day.dateString);
-              onSelected([selectedStart, day.dateString]);
+              newStart = day.dateString;
+              newEnd = undefined;
             }
-            //se è più grande di quella di inzio semplicemente setto quella di fine.
-          } else {
-            //se entrambe esistono resetto.
-            setSelectedStart(day.dateString);
-            setSelectedEnd(undefined);
-
-            onSelected([day.dateString, undefined]);
+            // sincronizzo gli stati con valori aggiornati e corretti
+            setSelectedStart(newStart);
+            setSelectedEnd(newEnd);
+            //salvo in un nuovo oggetto, perche la funzione vuole un obj
+            const newMarks = { newStart, newEnd };
+            //sincronizzo lo stato del range e passo i valori alla funzione chiamante da home.
+            setMarkedDates(newMarks);
+            onSelected({
+              startDate: newStart,
+              endDate: newEnd,
+            });
+          }}
+          markingType="period"
+          markedDates={
+            //faccio controllo, se esiste una data di inizio si esegue la funzione, altrimenti no.
+            selectedStart ? selectedDates(selectedStart, selectedEnd) : {}
           }
-        }}
-        markingType="period"
-        markedDates={
-          //faccio controllo, se esiste una data di inizio si esegue la funzione, altrimenti no.
-          selectedStart ? selectedDates(selectedStart, selectedEnd) : {}
-        }
-      />
+        />
+      </View>
+
+      {(selectedStart || selectedEnd) && (
+        <Text
+          style={{
+            textAlign: "center",
+            fontSize: containerSize * 0.05,
+            marginTop: containerSize * 0.01,
+          }}
+        >
+          {formatDate(selectedStart)}
+          {"   "}-{"   "}
+          {formatDate(selectedEnd)}
+        </Text>
+      )}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    width: "100%",
+    aspectRatio: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  innerContainer: {
+    maxWidth: "80%",
+    aspectRatio: 1,
+    alignItems: "center",
+  },
+});
