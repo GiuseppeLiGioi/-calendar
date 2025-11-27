@@ -1,6 +1,6 @@
+import CalendarComponent from "@/components/my/CalendarComponent";
 import { useState } from "react";
 import { View } from "react-native";
-import CalendarComponent from "../../components/my/CalendarComponent";
 export default function HomeScreen() {
   const formatISO = (d: Date | undefined) =>
     d ? d.toISOString().split("T")[0] : undefined;
@@ -11,9 +11,12 @@ export default function HomeScreen() {
   const formattedEndDate = formatISO(endDate);
   const [month, setMonth] = useState<number>(0);
 
-  const colorBack: string = "#fbb5b5ff";
-  const colorDot: string = "#6bfaeeff";
-  const colorNumber: string = "#d6fd82ff";
+  const colorBackground: string = "#fbb5b5ff"; //colore di sfondo calendario
+  const colorBackNumber: string = "#7ac3ffff"; //colore di sfondo numero del giorno
+  const colorDot: string = "#6bfaeeff"; //colore di pallino giorno selezionato
+  const colorNumber: string = "#d6fd82ff"; //colore di sfondo calendario
+  const colorText: string = "#10a529ff";
+  const todayColor: string = "#f505e9ff";
   const onSelected = (
     dates: [string | undefined, string | undefined]
   ): boolean => {
@@ -24,15 +27,18 @@ export default function HomeScreen() {
     setMonth(m);
   };
   return (
-    <View>
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
       <CalendarComponent
         startDate={startDate}
         endDate={endDate}
-        colorBack={colorBack}
+        colorBackground={colorBackground}
+        colorBackNumber={colorBackNumber}
         colorDot={colorDot}
+        colorText={colorText}
+        todayColor={todayColor}
         colorNumber={colorNumber}
-        onSelected={() => onSelected([formattedStartDate, formattedEndDate])}
-        onChangeMonth={() => onChangeMonth(month)}
+        onSelected={onSelected}
+        onChangeMonth={onChangeMonth}
       />
     </View>
   );
