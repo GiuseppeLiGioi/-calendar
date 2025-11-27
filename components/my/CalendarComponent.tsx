@@ -12,6 +12,7 @@ type CalendarProps = {
   borderColor: string;
   colorRange: string;
   colorNumberSelected: string;
+  customStyle: boolean;
 };
 type MarkedDateProps = {
   selected?: boolean;
@@ -37,6 +38,7 @@ export default function CalendarComponent({
   borderColor,
   colorRange,
   disabledColor,
+  customStyle,
 }: CalendarProps) {
   const [selectedStart, setSelectedStart] = useState<string | undefined>("");
   const [selectedEnd, setSelectedEnd] = useState<string | undefined>("");
@@ -165,7 +167,23 @@ export default function CalendarComponent({
         />
       </View>
 
-      {(selectedStart || selectedEnd) && (
+      {(selectedStart || selectedEnd) && customStyle === true && (
+        <View style={styles.customContainer}>
+          <Text
+            style={{
+              textAlign: "center",
+              fontSize: containerSize * 0.05,
+              marginTop: containerSize * 0.01,
+            }}
+          >
+            {formatDate(selectedStart)}
+            {"   "}-{"   "}
+            {formatDate(selectedEnd)}
+          </Text>
+        </View>
+      )}
+
+      {(selectedStart || selectedEnd) && customStyle === false && (
         <Text
           style={{
             textAlign: "center",
@@ -194,5 +212,11 @@ const styles = StyleSheet.create({
     maxWidth: "80%",
     aspectRatio: 1,
     alignItems: "center",
+  },
+
+  customContainer: {
+    width: "80%",
+    borderWidth: 2,
+    borderColor: "#f08383ff",
   },
 });

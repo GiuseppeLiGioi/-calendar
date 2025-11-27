@@ -23,6 +23,7 @@ export default function HomeScreen() {
   const disabledColor: string = "rgba(189, 189, 189, 0.5)";
   // Colore dei bordi del calendario
   const borderColor: string = "gray";
+  const customStyle: boolean = true;
 
   return (
     <>
@@ -36,6 +37,7 @@ export default function HomeScreen() {
           disabledColor={disabledColor}
           colorRange={colorRange}
           colorNumberSelected={colorNumberSelected}
+          customStyle={customStyle}
         />
       </View>
     </>
