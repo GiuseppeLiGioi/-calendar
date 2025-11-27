@@ -12,7 +12,6 @@ type CalendarProps = {
   borderColor: string;
   colorRange: string;
   colorNumberSelected: string;
-  customStyle: boolean;
 };
 type MarkedDateProps = {
   selected?: boolean;
@@ -38,7 +37,6 @@ export default function CalendarComponent({
   borderColor,
   colorRange,
   disabledColor,
-  customStyle,
 }: CalendarProps) {
   const [selectedStart, setSelectedStart] = useState<string | undefined>("");
   const [selectedEnd, setSelectedEnd] = useState<string | undefined>("");
@@ -91,21 +89,21 @@ export default function CalendarComponent({
     const [year, month, day] = date.split("-");
     return `${day}-${month}-${year}`;
   };
+
+  console.log(containerSize);
   return (
     <View
       style={styles.container}
       onLayout={(event) => {
         const { width, height } = event.nativeEvent.layout;
-        const newSize = Math.min(width, height, 450);
-        if (newSize !== containerSize) setContainerSize(newSize);
-        console.log(newSize);
+        const newSize = Math.min(width, height);
+        setContainerSize(newSize);
       }}
     >
       <View style={styles.innerContainer}>
         <Calendar
           style={{
-            minWidth: calendarSize,
-            aspectRatio: 1,
+            flex: 1,
             padding: calendarSize * 0.04,
             marginVertical: calendarSize * 0.05,
             borderRadius: calendarSize * 0.1,
@@ -167,8 +165,8 @@ export default function CalendarComponent({
         />
       </View>
 
-      {(selectedStart || selectedEnd) && customStyle === true && (
-        <View style={styles.customContainer}>
+      {(selectedStart || selectedEnd) && (
+        <View>
           <Text
             style={{
               textAlign: "center",
@@ -182,36 +180,26 @@ export default function CalendarComponent({
           </Text>
         </View>
       )}
-
-      {(selectedStart || selectedEnd) && customStyle === false && (
-        <Text
-          style={{
-            textAlign: "center",
-            fontSize: containerSize * 0.05,
-            marginTop: containerSize * 0.01,
-          }}
-        >
-          {formatDate(selectedStart)}
-          {"   "}-{"   "}
-          {formatDate(selectedEnd)}
-        </Text>
-      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    width: "100%",
-    aspectRatio: 1,
-    justifyContent: "center",
+    flex: 1,
+    justifyContent: "space-around",
     alignItems: "center",
+    borderWidth: 2,
+    borderColor: "red",
   },
 
   innerContainer: {
-    maxWidth: "80%",
-    aspectRatio: 1,
+    width: "100%",
+    justifyContent: "center",
     alignItems: "center",
+    aspectRatio: 1,
+    borderWidth: 2,
+    borderColor: "green",
   },
 
   customContainer: {
