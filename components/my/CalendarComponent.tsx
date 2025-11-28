@@ -44,6 +44,8 @@ export default function CalendarComponent({
   const [markedDates, setMarkedDates] = useState<{}>({});
 
   const calendarSize = Math.max(containerSize * 0.9, 320);
+  const effectiveHeight =
+    Platform.OS === "web" ? containerSize * 0.6 : containerSize;
 
   const selectedDates = (start: string, end?: string): MarkedDates => {
     //creo un oggeto marks che conterrà ciascun giorno con le sue proprietà
@@ -83,6 +85,34 @@ export default function CalendarComponent({
     return marks;
   };
 
+  function getMarginBottom(size: number): number {
+    let marginBottom = 0;
+
+    if (Platform.OS === "web") {
+      // valori web
+      if (size <= 500) {
+        marginBottom = size * 0.3;
+      } else if (size <= 600) {
+        marginBottom = size * 0.1;
+      } else if (size <= 750) {
+        marginBottom = size * 0.02;
+      } else {
+        marginBottom = size * 0.01;
+      }
+    } else {
+      //valori mobile
+      if (size <= 300) {
+        marginBottom = size * 0.4;
+      } else if (size <= 500) {
+        marginBottom = size * 0.02;
+      } else {
+        marginBottom = size * 0.01;
+      }
+    }
+
+    return marginBottom;
+  }
+
   //funzione per trasformare da YYYY-MM-DD a DD-MM-YYYY
   const formatDate = (date?: string): string => {
     if (!date) return "";
@@ -104,12 +134,9 @@ export default function CalendarComponent({
           styles.innerContainer,
           {
             width: calendarSize,
-            marginBottom:
-              containerSize < 500
-                ? containerSize * 0.3
-                : containerSize > 750
-                ? containerSize * 0.02
-                : containerSize * 0.1,
+            height: effectiveHeight,
+
+            marginBottom: getMarginBottom(containerSize),
           },
           Platform.OS === "web"
             ? { height: containerSize * 0.6 }
@@ -135,9 +162,12 @@ export default function CalendarComponent({
             dayTextColor: colorNumbers,
             textDisabledColor: disabledColor,
 
-            textDayFontSize: calendarSize * 0.065,
-            textDayHeaderFontSize: calendarSize * 0.045,
-            textMonthFontSize: calendarSize * 0.065,
+            textDayFontSize:
+              containerSize > 600 ? calendarSize * 0.02 : calendarSize * 0.065,
+            textDayHeaderFontSize:
+              containerSize > 600 ? calendarSize * 0.3 : calendarSize * 0.045,
+            textMonthFontSize:
+              containerSize > 600 ? calendarSize * 0.5 : calendarSize * 0.065,
 
             weekVerticalMargin: calendarSize * 0.01,
           }}
@@ -189,13 +219,6 @@ export default function CalendarComponent({
             }}
           >
             {formatDate(selectedStart)}
-          </Text>
-          <Text
-            style={{
-              textAlign: "center",
-              fontSize: containerSize * 0.05,
-            }}
-          >
             {"   "}-{"   "}
             {formatDate(selectedEnd)}
           </Text>
