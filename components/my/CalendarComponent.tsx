@@ -22,6 +22,11 @@ type MarkedDateProps = {
   marked?: boolean;
   startingDay?: boolean;
   endingDay?: boolean;
+
+  customStyles?: {
+    container?: object;
+    text?: object;
+  };
 };
 
 type MarkedDates = {
@@ -41,7 +46,7 @@ export default function CalendarComponent({
   const [selectedStart, setSelectedStart] = useState<string | undefined>("");
   const [selectedEnd, setSelectedEnd] = useState<string | undefined>("");
   const [containerSize, setContainerSize] = useState<number>(0);
-  const [markedDates, setMarkedDates] = useState<{}>({});
+  const [multiSelected, setMultiSelected] = useState<string[]>([]);
 
   const calendarSize = Math.max(containerSize * 0.9, 320);
   const effectiveHeight =
@@ -124,6 +129,43 @@ export default function CalendarComponent({
     return `${day}-${month}-${year}`;
   };
 
+  //funzione per trasformare il range in singoli giorni
+  const generateRange = (start: string, end: string): string[] => {
+    const result: string[] = [];
+    let first: Date = new Date(start);
+    let last: Date = new Date(end);
+
+    if (first > last) [first, last] = [last, first];
+
+    while (first <= last) {
+      const string = first.toISOString().split("T")[0];
+      result.push(string);
+      first.setDate(first.getDate() + 1);
+    }
+    return result;
+  };
+
+  const multiMarks = (dates: string[]): MarkedDates => {
+    const marks: MarkedDates = {};
+
+    dates.forEach((date) => {
+      marks[date] = {
+        customStyles: {
+          container: {
+            backgroundColor: colorRange,
+            borderRadius: 50,
+          },
+          text: {
+            color: colorNumberSelected,
+            fontWeight: "bold",
+          },
+        },
+      };
+    });
+
+    return marks;
+  };
+
   console.log(containerSize);
   return (
     <View
@@ -176,57 +218,104 @@ export default function CalendarComponent({
             weekVerticalMargin: calendarSize * 0.01,
           }}
           onDayPress={(day) => {
-            let newStart = selectedStart;
-            let newEnd = selectedEnd;
+            const date = day.dateString;
+            //multiSelected all'inizio è vuoto, posso fare controllo anche qui in alto, toggle giorno singolo.
+            if (multiSelected.length > 0) {
+              const newList = multiSelected.includes(date)
+                ? multiSelected.filter((d) => d !== date)
+                : [...multiSelected, date];
+
+              setMultiSelected(newList);
+              return;
+            }
 
             //se non esiste la data di inizio la setto e metto quella finale undefined.
-            if (!selectedStart) {
-              newStart = day.dateString;
-              newEnd = undefined;
-            } else if (!selectedEnd) {
-              if (day.dateString === selectedStart) return; // evita che si possa inserire lo stesso giorno sia come start che come end.
-              if (day.dateString <= selectedStart) {
-                //se la seconda data scelta è inferiore della prima, invertiamo i valori, la prima sarà la finale.
-                newStart = day.dateString;
-                newEnd = selectedStart;
+            if (!selectedStart && multiSelected.length === 0) {
+              setSelectedStart(date);
+              setSelectedEnd(undefined);
+              setMultiSelected([]);
+              return;
+            } else if (
+              selectedStart &&
+              !selectedEnd &&
+              multiSelected.length === 0
+            ) {
+              if (date === selectedStart) return; // evita che si possa inserire lo stesso giorno sia come start che come end.
+              if (date < selectedStart) {
+                setSelectedEnd(selectedStart);
+                setSelectedStart(date);
               } else {
-                //se invece è maggiore semplicemente la setto come finale.
-                newEnd = day.dateString;
+                setSelectedEnd(date);
               }
-            } else {
-              // else reset
-              newStart = day.dateString;
-              newEnd = undefined;
+              return;
             }
-            // sincronizzo gli stati con valori aggiornati e corretti
-            setSelectedStart(newStart);
-            setSelectedEnd(newEnd);
-            //salvo in un nuovo oggetto, perche la funzione vuole un obj
-            const newMarks = { newStart, newEnd };
-            //sincronizzo lo stato del range e passo i valori alla funzione chiamante da home.
-            setMarkedDates(newMarks);
+
+            //Range già selezionato passo alla multiSelezione, definisco il range.
+            if (selectedStart && selectedEnd) {
+              const newRange = generateRange(selectedStart, selectedEnd);
+              setMultiSelected(newRange);
+
+              setSelectedStart(undefined);
+              setSelectedEnd(undefined);
+              return;
+            }
           }}
-          markingType="period"
-          markedDates={
-            //faccio controllo, se esiste una data di inizio si esegue la funzione, altrimenti no.
-            selectedStart ? selectedDates(selectedStart, selectedEnd) : {}
-          }
+          markingType={multiSelected.length > 0 ? "custom" : "period"}
+          markedDates={(() => {
+            //se ci sono giorni nella lista, chiamo la funzione ed applico ad ognuno le prop calendar style
+            if (multiSelected.length > 0) {
+              return multiMarks(multiSelected);
+            }
+
+            // per il giorno singolo o range chiamo la funzione e setto acnhe qua le calendar prop style
+            if (selectedStart) {
+              return selectedDates(selectedStart, selectedEnd);
+            }
+            return {};
+          })()}
         />
       </View>
 
-      {(selectedStart || selectedEnd) && (
-        <View style={[styles.bottomContainer, { width: calendarSize }]}>
+      {multiSelected.length > 0 ? (
+        <View
+          style={[
+            styles.bottomContainer,
+            { maxWidth: calendarSize, marginTop: containerSize * 0.2 },
+          ]}
+        >
           <Text
             style={{
               textAlign: "center",
-              fontSize: containerSize * 0.05,
+              fontSize: containerSize * 0.045,
             }}
           >
-            {formatDate(selectedStart)}
-            {"   "}-{"   "}
-            {formatDate(selectedEnd)}
+            {multiSelected.join(" - ")}
           </Text>
         </View>
+      ) : (
+        (selectedStart || selectedEnd) && (
+          <View
+            style={[
+              styles.bottomContainer,
+              {
+                maxWidth: calendarSize,
+                marginTop: containerSize * 0.1,
+              },
+            ]}
+          >
+            <Text
+              style={{
+                textAlign: "center",
+                fontSize: containerSize * 0.05,
+                marginTop: containerSize * 0.15,
+              }}
+            >
+              {formatDate(selectedStart)}
+              {" - "}
+              {formatDate(selectedEnd)}
+            </Text>
+          </View>
+        )
       )}
     </View>
   );
