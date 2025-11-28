@@ -90,7 +90,11 @@ export default function CalendarComponent({
 
     if (Platform.OS === "web") {
       // valori web
-      if (size <= 500) {
+      if (size <= 200) {
+        marginBottom = size * 0.9;
+      } else if (size <= 300) {
+        marginBottom = size * 0.6;
+      } else if (size <= 500) {
         marginBottom = size * 0.3;
       } else if (size <= 600) {
         marginBottom = size * 0.1;
