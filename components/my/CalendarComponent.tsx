@@ -262,7 +262,7 @@ export default function CalendarComponent({
                 ? containerSize * 0.4
                 : containerSize < 300
                 ? containerSize * 0.2
-                : containerSize * 0.01,
+                : containerSize * 0.06,
           }}
           contentContainerStyle={{
             justifyContent: "center",
