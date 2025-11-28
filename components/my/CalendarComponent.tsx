@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Platform, StyleSheet, Text, View } from "react-native";
+import { Platform, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Calendar } from "react-native-calendars";
 
 type CalendarProps = {
@@ -49,6 +49,15 @@ export default function CalendarComponent({
   const [multiSelected, setMultiSelected] = useState<string[]>([]);
 
   const calendarSize = Math.max(containerSize * 0.9, 320);
+  const containerRadius = Math.min(containerSize * 0.1, 50);
+  const containerDim = Math.min(containerSize * 0.09, 50);
+  const fontSize = Math.min(Math.max(containerSize * 0.05, 12), 24);
+  const dayFontSize = Platform.OS === "web" ? fontSize : fontSize * 0.8;
+
+  const headerFontSize =
+    Platform.OS === "web" ? fontSize * 1.1 : fontSize * 0.9;
+
+  const monthFontSize = Platform.OS === "web" ? fontSize * 1.3 : fontSize;
   const effectiveHeight =
     Platform.OS === "web" ? containerSize * 0.6 : containerSize;
 
@@ -90,38 +99,6 @@ export default function CalendarComponent({
     return marks;
   };
 
-  function getMarginBottom(size: number): number {
-    let marginBottom = 0;
-
-    if (Platform.OS === "web") {
-      // valori web
-      if (size <= 200) {
-        marginBottom = size * 0.9;
-      } else if (size <= 300) {
-        marginBottom = size * 0.6;
-      } else if (size <= 500) {
-        marginBottom = size * 0.3;
-      } else if (size <= 600) {
-        marginBottom = size * 0.1;
-      } else if (size <= 750) {
-        marginBottom = size * 0.02;
-      } else {
-        marginBottom = size * 0.01;
-      }
-    } else {
-      //valori mobile
-      if (size <= 300) {
-        marginBottom = size * 0.4;
-      } else if (size <= 500) {
-        marginBottom = size * 0.02;
-      } else {
-        marginBottom = size * 0.01;
-      }
-    }
-
-    return marginBottom;
-  }
-
   //funzione per trasformare da YYYY-MM-DD a DD-MM-YYYY
   const formatDate = (date?: string): string => {
     if (!date) return "";
@@ -153,11 +130,15 @@ export default function CalendarComponent({
         customStyles: {
           container: {
             backgroundColor: colorRange,
-            borderRadius: 50,
+            borderRadius: containerRadius,
+            width: containerDim,
+            height: containerDim,
           },
           text: {
             color: colorNumberSelected,
+
             fontWeight: "bold",
+            fontSize: fontSize,
           },
         },
       };
@@ -181,8 +162,6 @@ export default function CalendarComponent({
           {
             width: calendarSize,
             height: effectiveHeight,
-
-            marginBottom: getMarginBottom(containerSize),
           },
           Platform.OS === "web"
             ? { height: containerSize * 0.6 }
@@ -190,6 +169,7 @@ export default function CalendarComponent({
         ]}
       >
         <Calendar
+          key={fontSize}
           style={{
             width: calendarSize,
 
@@ -208,12 +188,9 @@ export default function CalendarComponent({
             dayTextColor: colorNumbers,
             textDisabledColor: disabledColor,
 
-            textDayFontSize:
-              containerSize > 600 ? calendarSize * 0.02 : calendarSize * 0.065,
-            textDayHeaderFontSize:
-              containerSize > 600 ? calendarSize * 0.3 : calendarSize * 0.045,
-            textMonthFontSize:
-              containerSize > 600 ? calendarSize * 0.5 : calendarSize * 0.065,
+            textDayFontSize: dayFontSize,
+            textDayHeaderFontSize: headerFontSize,
+            textMonthFontSize: monthFontSize,
 
             weekVerticalMargin: calendarSize * 0.01,
           }}
@@ -277,11 +254,21 @@ export default function CalendarComponent({
       </View>
 
       {multiSelected.length > 0 ? (
-        <View
-          style={[
-            styles.bottomContainer,
-            { maxWidth: calendarSize, marginTop: containerSize * 0.2 },
-          ]}
+        <ScrollView
+          style={{
+            maxWidth: calendarSize,
+            marginTop:
+              containerSize < 200
+                ? containerSize * 0.4
+                : containerSize < 300
+                ? containerSize * 0.2
+                : containerSize * 0.01,
+          }}
+          contentContainerStyle={{
+            justifyContent: "center",
+            alignItems: "center",
+            paddingVertical: 5,
+          }}
         >
           <Text
             style={{
@@ -291,7 +278,7 @@ export default function CalendarComponent({
           >
             {multiSelected.join(" - ")}
           </Text>
-        </View>
+        </ScrollView>
       ) : (
         (selectedStart || selectedEnd) && (
           <View
@@ -299,7 +286,12 @@ export default function CalendarComponent({
               styles.bottomContainer,
               {
                 maxWidth: calendarSize,
-                marginTop: containerSize * 0.1,
+                marginTop:
+                  containerSize < 200
+                    ? containerSize * 0.4
+                    : containerSize < 300
+                    ? containerSize * 0.2
+                    : containerSize * 0.01,
               },
             ]}
           >
@@ -307,7 +299,6 @@ export default function CalendarComponent({
               style={{
                 textAlign: "center",
                 fontSize: containerSize * 0.05,
-                marginTop: containerSize * 0.15,
               }}
             >
               {formatDate(selectedStart)}
