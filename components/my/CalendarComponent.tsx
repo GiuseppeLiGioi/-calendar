@@ -291,7 +291,7 @@ export default function CalendarComponent({
                     ? containerSize * 0.4
                     : containerSize < 300
                     ? containerSize * 0.2
-                    : containerSize * 0.01,
+                    : containerSize * 0.06,
               },
             ]}
           >
@@ -314,7 +314,7 @@ export default function CalendarComponent({
 
 const styles = StyleSheet.create({
   container: {
-    width: "100%",
+    width: "50%",
     maxWidth: 800, // per non avere calendario troppo stretchato
     justifyContent: "space-between",
     alignItems: "center",
