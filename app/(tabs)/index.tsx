@@ -1,5 +1,6 @@
 import CalendarComponent from "@/components/my/CalendarComponent";
 import { View } from "react-native";
+import CCalendar from "@/components/my/CustomCalendarComponent";
 export default function HomeScreen() {
   // Sfondo del calendario
   const colorBackground: string = "#ffffffff";
@@ -24,9 +25,13 @@ export default function HomeScreen() {
   // Colore dei bordi del calendario
   const borderColor: string = "gray";
 
+  const onSelectDays=(days: string[])=>{
+      console.log(days)
+  }
+
   return (
     <>
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      {/*<View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <CalendarComponent
           colorBackground={colorBackground}
           colorText={colorText}
@@ -37,7 +42,10 @@ export default function HomeScreen() {
           colorRange={colorRange}
           colorNumberSelected={colorNumberSelected}
         />
-      </View>
+      </View>*/}
+        <View >
+            <CCalendar mode={'range'} onSelectDays={onSelectDays} backgroundColor={'white'}/>
+        </View>
     </>
   );
 }
